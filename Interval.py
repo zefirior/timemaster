@@ -5,4 +5,3 @@
 import time as T
 
 class Interval():
-    
