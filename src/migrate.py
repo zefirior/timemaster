@@ -48,9 +48,13 @@ with con:
 
     cur.execute('''CREATE TABLE alarm (
         ALARM_ID integer PRIMARY KEY AUTOINCREMENT,
-        SOME_OPTION text,
+        AL_NAME text,
+        AL_DESC text,
+        AL_TIME text,
+        USER_ID integer,
         RING_ID integer,
-        FOREIGN KEY (RING_ID) REFERENCES ring(RING_ID)
+        FOREIGN KEY (RING_ID) REFERENCES ring(RING_ID),
+        FOREIGN KEY (USER_ID) REFERENCES user(USER_ID)
     )''')
 
     cur.execute('''CREATE TABLE chainint (
@@ -83,3 +87,20 @@ with con:
             'Galiev'
     )''')
 
+    cur.execute('''INSERT INTO ring (
+        SOME_OPTION,
+        RING_PATH
+        ) VALUES (
+            'qwerty',
+            'qwe/rty'
+    )''')
+
+    cur.execute('''
+        INSERT INTO alarm (AL_NAME, AL_DESC, AL_TIME, USER_ID, RING_ID)
+            VALUES ('garstg', 'arggr', 'yetj', 1, 1)
+        ''')
+
+    cur.execute('''
+        INSERT INTO alarm (AL_NAME, AL_DESC, AL_TIME, USER_ID, RING_ID)
+            VALUES ('djgo,gil', 'arggr', 'yetj', 1, 1)
+        ''')
