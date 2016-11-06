@@ -1,9 +1,11 @@
+# -*- coding:utf-8 -*-
+
 import os
 import sys
 from env import BASE_DIR
 
-
-AUDIO_DIR = BASE_DIR + '/audio'
+# переписать через os.path.join
+AUDIO_DIR = BASE_DIR + '/../audio'
 
 mp3 = os.listdir(AUDIO_DIR)
 for i in range(len(mp3)):
