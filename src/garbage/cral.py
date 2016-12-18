@@ -6,7 +6,7 @@ import sys
 import zmq
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtGui import QMainWindow, QApplication
-from create_alarm import Ui_MainWindow, _translate
+from src.create_alarm import Ui_MainWindow, _translate
 
 # from lesson_TThu import Ui_Dialog
 

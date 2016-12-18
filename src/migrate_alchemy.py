@@ -134,17 +134,17 @@ Base.metadata.create_all(engine)
 #     user_passwd = hashlib.sha256('8c6976e5').hexdigest()
 # )
 
-Session = sessionmaker(bind=engine)
-session = Session()
+# Session = sessionmaker(bind=engine)
+# session = Session()
 # session.add(admin)
 
 # ret_user = session.query(User).filter_by(user_login='admin').first()
-me = User(birthday=datetime.date(1993, 2, 2), login = 'zefirior', passwd=hashlib.sha256('qwe').hexdigest(), name=u'Даниил', sname=u'Галиев')
-print(me)
-session.add(me)
-session.add_all(
-    (User(login = 'admin', passwd=hashlib.sha256('admin').hexdigest(), name=u'admin', sname=u'admin'),
-    User(login = 'ksu', passwd=hashlib.sha256('38153987').hexdigest(), name=u'Ксения', sname=u'Сусарова'),
-    Ring(name='good_morning', path='/path/to/file'))
-)
-session.commit()
+# me = User(birthday=datetime.date(1993, 2, 2), login = 'zefirior', passwd=hashlib.sha256('qwe').hexdigest(), name=u'Даниил', sname=u'Галиев')
+# print(me)
+# session.add(me)
+# session.add_all(
+#     (User(login = 'admin', passwd=hashlib.sha256('admin').hexdigest(), name=u'admin', sname=u'admin'),
+#     User(login = 'ksu', passwd=hashlib.sha256('38153987').hexdigest(), name=u'Ксения', sname=u'Сусарова'),
+#     Ring(name='good_morning', path='/path/to/file'))
+# )
+# session.commit()

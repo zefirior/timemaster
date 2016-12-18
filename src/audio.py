@@ -1,8 +1,8 @@
 # -*- coding:utf-8 -*-
 
 import os
-import sys
-from env import BASE_DIR
+
+from config import BASE_DIR
 
 # переписать через os.path.join
 AUDIO_DIR = BASE_DIR + '/../audio'
@@ -18,7 +18,7 @@ for i in range(len(mp3)):
 #sound = system.create_sound(mp3[1])
 #sound.play()
 
-import time, sys
+import time
 import pygame
 from pygame import *
 
