@@ -4,7 +4,6 @@ from src import core
 
 
 rout = Router()
-rout.load_controlle()
 print(rout._bindDict)
 # print(rout._caseController)
 # print(rout.controllers)

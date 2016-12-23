@@ -16,6 +16,7 @@ class Router(object):
         self.controllers = {}
         self.recorder = Recorder(self)
         self.recorder.fill()
+        self.load_controller()
 
     def find_in_case(self, obj_name, case):
         for obj in case:
@@ -23,7 +24,7 @@ class Router(object):
                 return obj
         raise Exception('Not obj {} in case {}'.format(obj_name, case))
 
-    def load_controlle(self, name_controller=None):
+    def load_controller(self, name_controller=None):
         objs = []
         if name_controller:
             objs.append(self.find_in_case(name_controller, self._caseController)(self))
@@ -40,7 +41,7 @@ class Router(object):
 
     def bind_model(self, controller, model_name):
         model = self.find_in_case(model_name, self._caseModel)
-        self._bindDict[controller.define]['model'] = model(self)
+        self._bindDict[controller.define]['model'] = model(self, controller)
 
     def get_model(self, controller, model_name):
         cname = controller.define

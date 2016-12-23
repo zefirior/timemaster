@@ -1,12 +1,12 @@
-from .inface import Inface
+from .fossil import ParentFossil
 
 
-class InfController(Inface):
-    define = 'InfController'
+class Controller(ParentFossil):
+    define = 'Controller'
 
     def __init__(self, router):
         super().__init__(router)
-        self.mname = 'InfModel'
+        self.mname = 'Model'
         self.model = None
         self.path = None
 
