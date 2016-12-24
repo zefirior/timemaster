@@ -1,11 +1,13 @@
+from .router import Router
 from .fossil import ParentFossil
 
 
-class Controller(ParentFossil):
+class Controller(object):
     define = 'Controller'
+    _type = 'Controller'
 
-    def __init__(self, router):
-        super().__init__(router)
+    def __init__(self):
+        self._router = Router()
         self.mname = 'Model'
         self.model = None
         self.path = None

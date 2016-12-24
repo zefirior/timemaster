@@ -1,10 +1,12 @@
 import config
-from src.core import Router
+from src.core import Recorder
 from src import core
+import inspect
 
 
-rout = Router()
-print(rout._bindDict)
+app = Recorder()
+app.fill()
+print(app.router._bindDict)
 # print(rout._caseController)
 # print(rout.controllers)
-print(rout.call_methods('InfController', 'preview_model'))
+print(app.router.call_methods('Controller', 'preview_model'))
