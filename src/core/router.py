@@ -1,12 +1,15 @@
 # -*- coding:utf-8 -*-
 
 import os
+import inspect
+import re
 # from inspect import getmembers
 # from .recorder import Recorder
 
 # пока не подключу конфиг
 PACKAGE_DIR = os.getcwd()
 SRC_DIR = PACKAGE_DIR + '/src'
+
 
 class RouterBinder(object):
     def __init__(self, parent_name, obj_name, iamparent):
@@ -48,7 +51,7 @@ class Router(object):
         for obj in case:
             if obj_name == obj.define:
                 return obj
-        raise Exception('Not obj {} in case {}'.format(obj_name, case))
+        return None  # raise Exception('Not obj {} in case {}'.format(obj_name, case))
 
     def load_controller(self, name_controller=None):
         objs = []
@@ -64,6 +67,23 @@ class Router(object):
                 del self.controllers[obj.define]
                 self.controllers[obj.define] = obj
                 self._bindDict[obj.define] = {}
+
+    def bind_element(self, parent_element, bind_element):
+        cases = []
+        for nattr, attr in inspect.getmembers(self):
+            if re.match('_case', nattr):
+                cases.append(attr)
+
+        b_elem = None
+        for case in cases:
+            b_elem = self.find_in_case(bind_element, case)
+            if b_elem is not None:
+                break
+        if b_elem is None:
+            raise Exception('Not element {}'.format(bind_element))
+
+        if parent_element.define in self._bindDict:
+            self._bindDict[parent_element.define][bind_element] = b_elem
 
     def bind_model(self, controller, model_name):
         model = self.find_in_case(model_name, self._caseModel)
