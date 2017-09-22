@@ -1,10 +1,12 @@
-import os.path
+# -*- coding: utf-8 -*-
+
 import time
 from datetime import datetime, timedelta
 import threading
 
 
-class TMaster:
+# TODO: remove loop
+class BackgroundTimer:
 
     def __init__(self, callable_get_next_point):
         self.__timer = None
@@ -46,8 +48,10 @@ class TMaster:
     def _timer_handler(self):
         if callable(self.__caller):
             self.__caller()
-            print(1)
         self.set_next_timer()
+
+    def is_sleeped(self):
+        return self.__timer is None
 
     def set_next_point_callable(self, caller):
         self.__point_getter = caller
@@ -66,9 +70,8 @@ class TMaster:
 
 if __name__ == '__main__':
 
-    BASE_DIR = os.path.dirname(__file__)
-    FILE_NAME = 'clock.txt'
-    FILE_PATH = os.path.join(BASE_DIR, FILE_NAME)
+    from . import conf
+    FILE_PATH = conf['Magic setting']['clock_path']
 
     times = []
     with open(FILE_PATH) as f:
@@ -104,7 +107,7 @@ if __name__ == '__main__':
         return tm, caller
 
 
-    TM = TMaster(get_printer)
+    TM = BackgroundTimer(get_printer)
     TM.run_loop()
     while len(l):
         time.sleep(1)
