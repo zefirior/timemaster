@@ -9,3 +9,4 @@ CONF_FILE = os.environ.get('TM_CONF_FILE', os.path.join(BASE_DIR, '../config.ini
 
 conf = configparser.ConfigParser()
 conf.read(CONF_FILE)
+conf['DB']['url'] = 'sqlite:///db/masterModel.db'
