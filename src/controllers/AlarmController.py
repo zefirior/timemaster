@@ -2,4 +2,4 @@
 
 
 class AlarmController(object):
-    def
+    pass

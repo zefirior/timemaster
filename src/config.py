@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
-from configuration import Scoper, Configurator
+from core import Scoper, Configurator
+
 
 BASE_DIR = os.path.dirname(__file__)
 CONF_FILE = os.environ.get('TM_CONF_FILE', os.path.join(BASE_DIR, '../config.ini'))

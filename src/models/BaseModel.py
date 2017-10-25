@@ -11,4 +11,6 @@ class BaseModel(object):
         self._session = self.conf.session
 
     def all(self):
-        return self._session.query(self.table_class).all()
+        res = self._connection.execute('select * from alarm').fetchall()
+        return res
+        # return self._session.query(self.table_class).all()
