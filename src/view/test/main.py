@@ -1,5 +1,6 @@
 # from core.mainUI import main
 from PyQt5.QtWidgets import QWidget, QTableWidget, QTableWidgetItem
+from PyQt5 import QtCore
 
 
 class MainView(QWidget):
@@ -19,10 +20,13 @@ class MainView(QWidget):
 
     def renderView(self):
 
+        # self.setGeometry(QtCore.QRect(9, 9, 400, 400))
+
         if self.table is None:
 
             #  setupUI
             self.table = QTableWidget(self)
+            # self.table.setGeometry(QtCore.QRect(9, 9, 400, 400))
             data = self.get_param('data')
             self.table.setRowCount(len(data))
             self.table.setColumnCount(len(data[0]))
