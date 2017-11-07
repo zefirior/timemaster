@@ -3,7 +3,7 @@
 import os
 import sys
 from operator import attrgetter
-from config import BASE_DIR
+from config.config import BASE_DIR
 
 
 class Integrator(object):

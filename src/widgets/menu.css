@@ -1,0 +1,30 @@
+QWidget#verticalLayoutWidget
+{
+	background-color: rgba(30, 130, 230, 1);
+	border-top-right-radius: 10px;
+	border-bottom-right-radius: 10px;
+}
+
+QPushButton
+{
+	background-color: rgba(31, 237, 134, 1);
+	border-width: 2px;
+    border-style: solid;
+    border-color: darkblue;
+	margin: 4px;
+}
+
+QPushButton:pressed
+{
+	background-color: rgba(250, 238, 5, 1);
+}
+
+QPushButton:hover
+{
+	border-width: 4px;
+}
+
+QLabel#label
+{
+    margin: 8px;
+}

@@ -1,16 +1,19 @@
-# -*- coding: utf-8 -*-
-from config.config import scoper
+#!/usr/bin/env python
+#  -*- coding: utf-8 -*-
 
-cur = scoper('general').connection
+import os
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
 
-# con = sqlite3.connect(DBASE_NAME)
+from config import config
 
-# with con:
+cur = config.scoper('general').connection
 
 cur.execute('DROP TABLE IF EXISTS alarm')
 cur.execute('DROP TABLE IF EXISTS one_alarm')
 cur.execute('DROP TABLE IF EXISTS ring')
 cur.execute('DROP TABLE IF EXISTS user')
+cur.execute('DROP TABLE IF EXISTS menu')
 
 cur.execute('''CREATE TABLE menu (
     MENU_ID integer PRIMARY KEY AUTOINCREMENT,
@@ -19,6 +22,12 @@ cur.execute('''CREATE TABLE menu (
     MENU_ABBR text,
     MENU_ORDER text
 )''')
+
+cur.execute('''INSERT INTO menu ( MENU_PARENT_ID, MENU_PATH, MENU_ABBR, MENU_ORDER ) VALUES
+    ( NULL, 'periodalarm', 'PeriodAlarm', '1' ),
+    ( NULL, 'test', 'Test', '2' ),
+    ( NULL, 'test2', 'Test2', '3' )
+''')
 
 cur.execute('''CREATE TABLE user (
     USER_ID integer PRIMARY KEY AUTOINCREMENT,

@@ -1,5 +1,5 @@
 # coding: utf8
-from config import scoper
+from config.config import scoper
 
 
 class BaseModel(object):

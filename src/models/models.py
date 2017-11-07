@@ -42,3 +42,13 @@ class Alarm(Base):
 
     user = relationship(u'User')
     ring = relationship(u'Ring')
+
+
+class Menu(Base):
+    __tablename__ = 'menu'
+
+    MENU_ID = Column(Integer, primary_key=True)
+    MENU_PARENT_ID = Column(Integer)
+    MENU_PATH = Column(String(250))
+    MENU_ABBR = Column(String(250))
+    MENU_ORDER = Column(Integer)
