@@ -46,10 +46,6 @@ if __name__ == '__main__':
             self.menu.setGeometry(QtCore.QRect(self.t, self.r, self.w, self.h))
             self.verticalLayoutWidget.setGeometry(QtCore.QRect(0, 0, self.w, self.h))
 
-            self.hidder = QtCore.pyqtProperty(int, fset=self._hidder)
-            self.hidder_2 = QtCore.pyqtProperty(int, fset=self._hidder)
-            self.hidder_3 = QtCore.pyqtProperty(int, fset=self._hidder)
-
             # self.label.mouseReleaseEvent = lambda ev: self.label.emit(QtCore.SIGNAL('clicked()'))
 
             self.machine = QtCore.QStateMachine()
@@ -87,23 +83,22 @@ if __name__ == '__main__':
 
             self.machine.start()
 
-        def _hidder(self, obj):
+        @staticmethod
+        def _hidder(obj):
             widg, hide_val = obj
             widg.setHidden(hide_val)
 
+        hidder = QtCore.pyqtProperty(int, fset=_hidder)
+        hidder_2 = QtCore.pyqtProperty(int, fset=_hidder)
+        hidder_3 = QtCore.pyqtProperty(int, fset=_hidder)
 
     app = QApplication(sys.argv)
     main = MainApp()
-    # setuper = Ui_MenuWidget()
-    # setuper.setupUi(main.menu)
-    # menu_label = setuper.label
 
     # ani = QtCore.QPropertyAnimation()
 
     with open('./menu.css') as css:
         main.setStyleSheet(css.read())
-    # setuper.verticalLayoutWidget.setStyleSheet("background-color: rgba(30, 130, 230, 1);")
-    # setuper.verticalLayoutWidget.setStyleSheet("border-radius: 0 30px 30px 0;")
 
     main.show()
 
