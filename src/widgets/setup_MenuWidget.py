@@ -8,6 +8,18 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+
+class HidButton(QtWidgets.QPushButton):
+
+    @QtCore.pyqtProperty(int)
+    def hidder(self):
+        return self.isHidden()
+
+    @hidder.setter
+    def hidder(self, value):
+        self.setHidden(value)
+
+
 class Ui_MenuWidget(object):
     def setupUi(self, MenuWidget):
         MenuWidget.setObjectName("MenuWidget")
@@ -38,13 +50,13 @@ class Ui_MenuWidget(object):
         self.verticalLayout.addItem(spacerItem)
         self.verticalLayout_2 = QtWidgets.QVBoxLayout()
         self.verticalLayout_2.setObjectName("verticalLayout_2")
-        self.pushButton_3 = QtWidgets.QPushButton(self.verticalLayoutWidget)
+        self.pushButton_3 = HidButton(self.verticalLayoutWidget)
         self.pushButton_3.setObjectName("pushButton_3")
         self.verticalLayout_2.addWidget(self.pushButton_3)
-        self.pushButton = QtWidgets.QPushButton(self.verticalLayoutWidget)
+        self.pushButton = HidButton(self.verticalLayoutWidget)
         self.pushButton.setObjectName("pushButton")
         self.verticalLayout_2.addWidget(self.pushButton)
-        self.pushButton_2 = QtWidgets.QPushButton(self.verticalLayoutWidget)
+        self.pushButton_2 = HidButton(self.verticalLayoutWidget)
         self.pushButton_2.setObjectName("pushButton_2")
         self.verticalLayout_2.addWidget(self.pushButton_2)
         self.verticalLayout.addLayout(self.verticalLayout_2)
