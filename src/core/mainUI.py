@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QFrame, QVBoxLay
 from PyQt5 import QtWidgets
 from Ui_MainWindow import Ui_MainWindow
 from core import controlmap
+from widgets import MenuWidget
 
 
 class MainApp(QMainWindow):
@@ -21,7 +22,7 @@ class MainApp(QMainWindow):
 
 class WindowSetuper(Ui_MainWindow):
     def __init__(self, main):
-        super().__init__()
+        super(WindowSetuper).__init__()
         self.main = main
         self.views = {}
         self.menu_button = {}
@@ -34,14 +35,9 @@ class WindowSetuper(Ui_MainWindow):
         return self.workspace.findChildren(QVBoxLayout, 'verticalLayout_5')[0]
 
     def clearWorkSpace(self):
-        layout = self.get_worklayout(); print(layout.count())
+        layout = self.get_worklayout()
         for childI in range(layout.count()):
-            print('hidden ' + str(childI))
             layout.itemAt(childI).widget().setHidden(1)
-            # layout.removeWidget(child)
-            # child.setParent(None)
-            # child.deleteLater()
-            # self.workspace.setLayout(layout)
 
     @staticmethod
     def wrapView(name):
@@ -49,9 +45,7 @@ class WindowSetuper(Ui_MainWindow):
 
     def setWorkSpace(self, view):
         layout = self.get_worklayout()
-        print(layout)
         layout.addWidget(view)
-        # self.workspace.setLayout(layout)
 
     @staticmethod
     def getWidgetByName(layout, child_name):
@@ -59,8 +53,8 @@ class WindowSetuper(Ui_MainWindow):
             w = layout.itemAt(chldI).widget()
             if w.objectName() == child_name:
                 return w
-            else:
-                print(w.objectName())
+            # else:
+            #     print(w.objectName())
 
     def view_exec(self):
         sender = self.main.sender()
@@ -78,20 +72,10 @@ class WindowSetuper(Ui_MainWindow):
             self.setWorkSpace(view)
 
     def menu_build(self):
-        for section_name in controlmap:
-            button = QtWidgets.QPushButton(self.verticalLayoutWidget)
 
-            button.setObjectName(section_name)
-            self.verticalLayout_4.addWidget(button)
-            button.setObjectName("pushButton" + section_name)
-            button.setText(section_name)
-            button.section_name = section_name
-            self.menu_button[section_name] = button
+        menu_line = [{'name': section_name, 'action': self.view_exec} for section_name in controlmap]
 
-            button.clicked.connect(self.view_exec)
-
-        spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        self.verticalLayout_4.addItem(spacerItem)
+        self.menu = MenuWidget(menu_line, self.main, 0, 100)
 
 
 

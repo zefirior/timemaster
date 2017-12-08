@@ -29,13 +29,13 @@ class Integrator(object):
 
         breadcrumbs = self.control_path.split('/')
         obj = view
-        print(obj)
+        # print(obj)
         for crumb in breadcrumbs:
             obj = getattr(obj, crumb.lower(), None)
-            print (obj, crumb.lower())
+            # print (obj, crumb.lower())
         #  add postfix
         vname = vname.capitalize() + 'View'
-        print(obj, vname)
+        # print(obj, vname)
         obj = getattr(obj, vname, None)(parent=parent)
         return obj
 

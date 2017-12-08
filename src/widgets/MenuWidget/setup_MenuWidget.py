@@ -9,17 +9,6 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
-class HidButton(QtWidgets.QPushButton):
-
-    @QtCore.pyqtProperty(int)
-    def hidder(self):
-        return self.isHidden()
-
-    @hidder.setter
-    def hidder(self, value):
-        self.setHidden(value)
-
-
 class Ui_MenuWidget(object):
     def setupUi(self, MenuWidget):
         MenuWidget.setObjectName("MenuWidget")
@@ -41,7 +30,7 @@ class Ui_MenuWidget(object):
         self.label.setMaximumSize(QtCore.QSize(40, 40))
         self.label.setText("")
         self.label.setTextFormat(QtCore.Qt.PlainText)
-        self.label.setPixmap(QtGui.QPixmap("../../content/image/512px-Reorder_font_awesome.svg.png"))
+        self.label.setPixmap(QtGui.QPixmap("../content/image/512px-Reorder_font_awesome.svg.png"))
         self.label.setScaledContents(True)
         self.label.setObjectName("label")
         self.horizontalLayout_2.addWidget(self.label)
@@ -50,26 +39,26 @@ class Ui_MenuWidget(object):
         self.verticalLayout.addItem(spacerItem)
         self.verticalLayout_2 = QtWidgets.QVBoxLayout()
         self.verticalLayout_2.setObjectName("verticalLayout_2")
-        self.pushButton_3 = HidButton(self.verticalLayoutWidget)
-        self.pushButton_3.setObjectName("pushButton_3")
-        self.verticalLayout_2.addWidget(self.pushButton_3)
-        self.pushButton = HidButton(self.verticalLayoutWidget)
-        self.pushButton.setObjectName("pushButton")
-        self.verticalLayout_2.addWidget(self.pushButton)
-        self.pushButton_2 = HidButton(self.verticalLayoutWidget)
-        self.pushButton_2.setObjectName("pushButton_2")
-        self.verticalLayout_2.addWidget(self.pushButton_2)
+        # self.pushButton_3 = HidButton(self.verticalLayoutWidget)
+        # self.pushButton_3.setObjectName("pushButton_3")
+        # self.verticalLayout_2.addWidget(self.pushButton_3)
+        # self.pushButton = HidButton(self.verticalLayoutWidget)
+        # self.pushButton.setObjectName("pushButton")
+        # self.verticalLayout_2.addWidget(self.pushButton)
+        # self.pushButton_2 = HidButton(self.verticalLayoutWidget)
+        # self.pushButton_2.setObjectName("pushButton_2")
+        # self.verticalLayout_2.addWidget(self.pushButton_2)
         self.verticalLayout.addLayout(self.verticalLayout_2)
         spacerItem1 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.verticalLayout.addItem(spacerItem1)
 
-        self.retranslateUi(MenuWidget)
+        # self.retranslateUi(MenuWidget)
         QtCore.QMetaObject.connectSlotsByName(MenuWidget)
 
-    def retranslateUi(self, MenuWidget):
-        _translate = QtCore.QCoreApplication.translate
-        MenuWidget.setWindowTitle(_translate("MenuWidget", "Menu"))
-        self.pushButton_3.setText(_translate("MenuWidget", "PushButton"))
-        self.pushButton.setText(_translate("MenuWidget", "PushButton"))
-        self.pushButton_2.setText(_translate("MenuWidget", "PushButton"))
+    # def retranslateUi(self, MenuWidget):
+    #     _translate = QtCore.QCoreApplication.translate
+    #     MenuWidget.setWindowTitle(_translate("MenuWidget", "Menu"))
+    #     self.pushButton_3.setText(_translate("MenuWidget", "PushButton"))
+    #     self.pushButton.setText(_translate("MenuWidget", "PushButton"))
+    #     self.pushButton_2.setText(_translate("MenuWidget", "PushButton"))
 
