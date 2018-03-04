@@ -1,0 +1,32 @@
+DROP TABLE IF EXISTS alarm;
+DROP TABLE IF EXISTS alarm_type;
+DROP TABLE IF EXISTS menu;
+
+CREATE TABLE menu (
+    MENU_ID integer PRIMARY KEY AUTOINCREMENT,
+    MENU_PARENT_ID integer,
+    MENU_PATH text,
+    MENU_ABBR text,
+    MENU_ORDER text
+);
+
+CREATE TABLE alarm_type (
+    ID integer PRIMARY KEY AUTOINCREMENT,
+    ALARM_TYPE_CODE text,
+    ALARM_TYPE_DESC text
+);
+
+CREATE TABLE alarm (
+    ID integer PRIMARY KEY AUTOINCREMENT,
+    ALARM_TYPE_ID integer,
+    ALARM_NAME text,
+    ALARM_DESC text,
+    ALARM_TIME text,
+    FOREIGN KEY (ALARM_TYPE_ID) REFERENCES alarm_type(ID)
+);
+
+INSERT INTO alarm_type (ID, ALARM_TYPE_CODE, ALARM_TYPE_DESC)
+    VALUES (1, 'test', 'for test');
+
+INSERT INTO alarm (ALARM_TYPE_ID, ALARM_NAME, ALARM_DESC, ALARM_TIME)
+    VALUES (1, 'my alarm', NULL, '2017-01-01 00:00:01');
