@@ -71,7 +71,7 @@ class MenuWidget(QW.QWidget, Ui_MenuWidget):
         self.state_close.assignProperty(self.verticalLayoutWidget, 'size', QtCore.QSize(50, self.h))
 
         # label become button
-        self.label.mousePressEvent = lambda e:self.icon_clicker.emit()
+        self.label.mousePressEvent = lambda e: self.icon_clicker.emit()
 
         self.t_close = self.state_open.addTransition(self.icon_clicker, self.state_close)
         self.t_close.addAnimation(QtCore.QPropertyAnimation(self, b'size', self.state_close))
@@ -87,7 +87,7 @@ class MenuWidget(QW.QWidget, Ui_MenuWidget):
             self.t_close.addAnimation(QtCore.QPropertyAnimation(button, b'hidder', self.state_close))
             self.t_open.addAnimation(QtCore.QPropertyAnimation(button, b'hidder', self.state_open))
 
-        self.machine.setInitialState(self.state_open)
+        self.machine.setInitialState(self.state_close)
 
         self.machine.start()
 

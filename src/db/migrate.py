@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from config.config import scoper
 
-cur = scoper('test').connection
+cur = scoper().connection
 
 # con = sqlite3.connect(DBASE_NAME)
 

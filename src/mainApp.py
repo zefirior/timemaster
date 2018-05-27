@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
+from ui.interval_view import Ui_MainWindow
 from core.mainUI import app, main, WindowSetuper
 from PyQt5.QtWidgets import QApplication
 

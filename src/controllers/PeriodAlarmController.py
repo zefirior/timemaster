@@ -3,7 +3,7 @@ from core.integrator import Integrator
 
 
 class PeriodAlarmController(object):
-    cname = 'periodAlarm'
+    cname = 'Periodalarm'
 
     def __init__(self):
         # TODO: refactor

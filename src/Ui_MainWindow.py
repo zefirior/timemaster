@@ -12,7 +12,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(600, 500)
+        MainWindow.setGeometry(200, 200, 800, 600)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.verticalLayoutWidget = QtWidgets.QWidget(self.centralwidget)
@@ -33,7 +33,7 @@ class Ui_MainWindow(object):
         # spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         # self.verticalLayout_4.addItem(spacerItem)
         self.verticalFrame_2 = QtWidgets.QFrame(self.centralwidget)
-        self.verticalFrame_2.setGeometry(QtCore.QRect(179, 9, 411, 431))
+        self.verticalFrame_2.setGeometry(QtCore.QRect(80, 9, 550, 431))
         self.verticalFrame_2.setObjectName("verticalFrame_2")
         self.verticalLayout_5 = QtWidgets.QVBoxLayout(self.verticalFrame_2)
         self.verticalLayout_5.setObjectName("verticalLayout_5")
