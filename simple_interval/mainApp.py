@@ -33,9 +33,9 @@ class TimeLauncher(QMainWindow, Ui_MainWindow):
 
         self.schedule = {
             #  id: [delay, name]
-            1: [3, 'будильник 1'],
-            2: [5, 'будильник 2'],
-            3: [3, 'будильник 3'],
+            1: [1, 'будильник 1'],
+            2: [1, 'будильник 2'],
+            3: [1, 'будильник 3'],
         }
         self.schedule_order = [1, 3, 2]
         self.cur_task_id = None
@@ -47,13 +47,28 @@ class TimeLauncher(QMainWindow, Ui_MainWindow):
         self.reset_button.clicked.connect(self.on_reset)
         # connections block
 
+    def get_next_task(self, id):
+        index = self.schedule_order.index(id)
+        if len(self.schedule_order) - 1 == index:
+            return
+        return self.schedule_order[index + 1]
+
     def run_task(self, id):
         if id not in self.schedule:
             return
         delay, name = self.schedule.get(id)
+        next_task_id = self.get_next_task(id)
         logging.info('run task "{}"'.format(name))
         self.cur_task_id = id
         self.cur_task_name = name
+
+        self.cur_tomate_text.setText(name)
+        self.next_tomate_text.setText('')
+
+        if next_task_id:
+            ndelay, nname = self.schedule.get(next_task_id)
+            self.next_tomate_text.setText(nname)
+
         self.delay_thread = DelayThread(delay)
         self.delay_thread.alarm_timeout.connect(self.on_timeout)
         self.delay_thread.alarm_tic.connect(self.on_tik)
@@ -85,11 +100,10 @@ class TimeLauncher(QMainWindow, Ui_MainWindow):
         logging.info('main continue')
         self.notificator.General.hide()
         task_id = self.cur_task_id
-        index = self.schedule_order.index(task_id)
-        if index == len(self.schedule_order) - 1:
+        next_task_id = self.get_next_task(task_id)
+        if next_task_id is None:
             self.work_state = False
             return
-        next_task_id = self.schedule_order[index + 1]
         self.run_task(next_task_id)
 
     def schedule_stop(self):
@@ -98,6 +112,8 @@ class TimeLauncher(QMainWindow, Ui_MainWindow):
         self.work_state = False
         self.lcd_second.display(0)
         self.lcd_minute.display(0)
+        self.cur_tomate_text.setText('')
+        self.next_tomate_text.setText('')
 
     def on_reset(self):
         self.delay_thread.terminate()
