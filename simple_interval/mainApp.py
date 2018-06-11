@@ -1,12 +1,13 @@
+#! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import sys
 import logging
 from ui.interval_view import Ui_MainWindow
-# from core.mainUI import app, main, WindowSetuper
-from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QFrame, QVBoxLayout, QHBoxLayout, QPushButton
-from PyQt5.QtCore import pyqtSlot, QRect, QThread, pyqtSignal
-from PyQt5 import QtCore
+from config import MINUTE, TIC_PER_SECOND
+from notificator import Notificator
+from delay_thread import DelayThread
+from PyQt5.QtWidgets import QApplication, QMainWindow
 
 
 class MainApp(QMainWindow):
@@ -17,61 +18,11 @@ class MainApp(QMainWindow):
         self.height = 400
         self.left = 400
         self.top = 200
-        self.workspace = None
-        self.views = {}
+        # self.workspace = None
+        # self.views = {}
 
 
-class Notificator(object):
-    def __init__(self, app):
-        self.app = app
-        self.main = app
-        self.setup()
-
-        self.pushButton.clicked.connect(self.on_ok)
-        self.pushButton_2.clicked.connect(self.on_cancel)
-
-    def setup(self):
-        self.General = QWidget()
-        self.General.setGeometry(QRect(360, 100, 211, 21))
-        self.General.setObjectName("horizontalLayoutWidget")
-        self.horizontalLayout = QHBoxLayout(self.General)
-        self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
-        self.horizontalLayout.setObjectName("horizontalLayout")
-        self.pushButton = QPushButton(self.General)
-        self.pushButton.setObjectName("pushButton")
-        self.pushButton.setText("continue")
-        self.horizontalLayout.addWidget(self.pushButton)
-        self.pushButton_2 = QPushButton(self.General)
-        self.pushButton_2.setObjectName("pushButton_2")
-        self.pushButton_2.setText("cancel")
-        self.horizontalLayout.addWidget(self.pushButton_2)
-        # QtCore.QMetaObject.connectSlotsByName(self.main)
-
-    def on_ok(self):
-        logging.info('notificator continue')
-        self.main.schedule_continue()
-
-    def on_cancel(self):
-        logging.info('notificator stop')
-        self.main.schedule_stop()
-
-
-class DelayThread(QThread):
-    signal = pyqtSignal()
-
-    def __init__(self, delay):
-        QThread.__init__(self)
-        self.delay = delay
-
-    def __del__(self):
-        self.wait()
-
-    def run(self):
-        self.sleep(self.delay)
-        self.signal.emit()
-
-
-class TimeLauncher(MainApp, Ui_MainWindow):
+class TimeLauncher(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
@@ -82,16 +33,18 @@ class TimeLauncher(MainApp, Ui_MainWindow):
 
         self.schedule = {
             #  id: [delay, name]
-            1: [2, 'будильник 1'],
-            2: [2, 'будильник 2'],
-            3: [2, 'будильник 3'],
+            1: [3, 'будильник 1'],
+            2: [5, 'будильник 2'],
+            3: [3, 'будильник 3'],
         }
         self.schedule_order = [1, 3, 2]
         self.cur_task_id = None
         self.cur_task_name = None
 
         # connections block
-        self.pushButton.clicked.connect(self.begin_scheduler)
+        self.begin_button.clicked.connect(self.begin_scheduler)
+        self.pause_button.clicked.connect(self.on_pause)
+        self.reset_button.clicked.connect(self.on_reset)
         # connections block
 
     def run_task(self, id):
@@ -102,12 +55,24 @@ class TimeLauncher(MainApp, Ui_MainWindow):
         self.cur_task_id = id
         self.cur_task_name = name
         self.delay_thread = DelayThread(delay)
-        self.delay_thread.signal.connect(self.on_timeout)
+        self.delay_thread.alarm_timeout.connect(self.on_timeout)
+        self.delay_thread.alarm_tic.connect(self.on_tik)
         self.delay_thread.start()
 
     def on_timeout(self):
         logging.info('run task "{}"'.format(self.cur_task_name))
         self.notificator.General.show()
+
+    def on_pause(self):
+        if self.work_state:
+            new_state = not self.delay_thread.pause
+            self.delay_thread.pause = new_state
+
+    def on_tik(self, number):
+        minute_num = number // MINUTE
+        second_num = number - minute_num * MINUTE
+        self.lcd_minute.display(minute_num)
+        self.lcd_second.display(second_num)
 
     def begin_scheduler(self):
         if self.work_state:
@@ -131,6 +96,12 @@ class TimeLauncher(MainApp, Ui_MainWindow):
         logging.info('main stop')
         self.notificator.General.hide()
         self.work_state = False
+        self.lcd_second.display(0)
+        self.lcd_minute.display(0)
+
+    def on_reset(self):
+        self.delay_thread.terminate()
+        self.schedule_stop()
 
 
 if __name__ == '__main__':
