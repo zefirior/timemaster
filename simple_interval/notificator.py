@@ -1,35 +1,31 @@
 import logging
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QPushButton
-from PyQt5.QtCore import QRect
+from PyQt5.QtWidgets import QWidget
+from ui.continue_dialog import Ui_Form as cont_form
+from ui.finish_dialog import Ui_Form as fin_form
 
 
-class Notificator(object):
+class BaseDialog(QWidget):
     def __init__(self, app):
+        super().__init__()
         self.app = app
         self.main = app
-        self.setup()
+        self.setupUi(self)
+        self.setup_dialog()
 
-        self.pushButton.clicked.connect(self.on_ok)
-        self.pushButton_2.clicked.connect(self.on_cancel)
+    def setup_dialog(self):
+        raise NotImplemented
 
-    def setup(self):
-        self.General = QWidget()
-        self.General.setGeometry(QRect(360, 100, 211, 21))
-        self.General.setObjectName("horizontalLayoutWidget")
-        self.horizontalLayout = QHBoxLayout(self.General)
-        self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
-        self.horizontalLayout.setObjectName("horizontalLayout")
-        self.pushButton = QPushButton(self.General)
-        self.pushButton.setObjectName("pushButton")
-        self.pushButton.setText("continue")
-        self.horizontalLayout.addWidget(self.pushButton)
-        self.pushButton_2 = QPushButton(self.General)
-        self.pushButton_2.setObjectName("pushButton_2")
-        self.pushButton_2.setText("cancel")
-        self.horizontalLayout.addWidget(self.pushButton_2)
-        # QtCore.QMetaObject.connectSlotsByName(self.main)
 
-    def on_ok(self):
+class ContinueDialog(BaseDialog, cont_form):
+
+    def setup_dialog(self):
+        self.continue_button.clicked.connect(self.on_continue)
+        self.cancel_button.clicked.connect(self.on_cancel)
+
+    def display_alarm_name(self, name):
+        self.cur_alarm_name.setText(name)
+
+    def on_continue(self):
         logging.info('notificator continue')
         self.main.schedule_continue()
 
@@ -38,3 +34,11 @@ class Notificator(object):
         self.main.schedule_stop()
 
 
+class FinishDialog(BaseDialog, fin_form):
+
+    def setup_dialog(self):
+        self.button_ok.clicked.connect(self.on_ok)
+
+    def on_ok(self):
+        logging.info('recipe stop')
+        self.main.schedule_stop()

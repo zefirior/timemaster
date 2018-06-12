@@ -5,7 +5,7 @@ import sys
 import logging
 from ui.interval_view import Ui_MainWindow
 from config import MINUTE, TIC_PER_SECOND
-from notificator import Notificator
+from notificator import ContinueDialog, FinishDialog
 from delay_thread import DelayThread
 from PyQt5.QtWidgets import QApplication, QMainWindow
 
@@ -26,7 +26,8 @@ class TimeLauncher(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
-        self.notificator = Notificator(self)
+        self.continue_dialog = ContinueDialog(self)
+        self.finish_dialog = FinishDialog(self)
 
         self.delay_thread = None
         self.work_state = False
@@ -62,6 +63,8 @@ class TimeLauncher(QMainWindow, Ui_MainWindow):
         self.cur_task_id = id
         self.cur_task_name = name
 
+        self.continue_dialog.display_alarm_name(self.cur_task_name)
+
         self.cur_tomate_text.setText(name)
         self.next_tomate_text.setText('')
 
@@ -76,7 +79,10 @@ class TimeLauncher(QMainWindow, Ui_MainWindow):
 
     def on_timeout(self):
         logging.info('run task "{}"'.format(self.cur_task_name))
-        self.notificator.General.show()
+        if self.get_next_task(self.cur_task_id):
+            self.continue_dialog.show()
+        else:
+            self.finish_dialog.show()
 
     def on_pause(self):
         if self.work_state:
@@ -98,7 +104,8 @@ class TimeLauncher(QMainWindow, Ui_MainWindow):
 
     def schedule_continue(self):
         logging.info('main continue')
-        self.notificator.General.hide()
+        self.continue_dialog.hide()
+        self.finish_dialog.hide()
         task_id = self.cur_task_id
         next_task_id = self.get_next_task(task_id)
         if next_task_id is None:
@@ -108,7 +115,8 @@ class TimeLauncher(QMainWindow, Ui_MainWindow):
 
     def schedule_stop(self):
         logging.info('main stop')
-        self.notificator.General.hide()
+        self.continue_dialog.hide()
+        self.finish_dialog.hide()
         self.work_state = False
         self.lcd_second.display(0)
         self.lcd_minute.display(0)
