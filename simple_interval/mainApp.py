@@ -3,23 +3,47 @@
 
 import sys
 import logging
+import warnings
 from ui.interval_view import Ui_MainWindow
 from config import MINUTE, TIC_PER_SECOND
 from notificator import ContinueDialog, FinishDialog
 from delay_thread import DelayThread
 from PyQt5.QtWidgets import QApplication, QMainWindow
+from recipe_model import RecipeModel
+from tomate_model import TomateModel
 
 
-class MainApp(QMainWindow):
-    def __init__(self, width=400, height=400, left=400, top=400):
-        super().__init__()
-        self.title = 'mainApp'
-        self.width = 400
-        self.height = 400
-        self.left = 400
-        self.top = 200
-        # self.workspace = None
-        # self.views = {}
+class Scheduler:
+    def __init__(self):
+        self.cur_recipe = None
+        self.cur_tomate = None
+
+    @staticmethod
+    def all_recipe():
+        return RecipeModel.recipe_all()
+
+    def select_recipe(self, name):
+        recipe = RecipeModel.recipe_by_name(name)
+        self.cur_recipe = recipe
+        logging.info(self.cur_recipe)
+
+    def select_tomate(self, tomate):
+        self.cur_tomate = tomate
+
+    def get_next_tomate(self):
+        if self.cur_recipe is None:
+            raise Exception
+        if self.cur_tomate is None:
+            cur_tomate_order = 0
+        else:
+            cur_tomate_order = self.cur_tomate.tomate_order
+        tomates = TomateModel.tomate_by_recipe(self.cur_recipe)
+        tomates = [tomate for tomate in tomates if tomate.tomate_order > cur_tomate_order]
+        tomates.sort(key=lambda tomate: tomate.tomate_order)
+        if len(tomates) > 0:
+            return tomates[0]
+        else:
+            return
 
 
 class TimeLauncher(QMainWindow, Ui_MainWindow):
@@ -31,55 +55,44 @@ class TimeLauncher(QMainWindow, Ui_MainWindow):
 
         self.delay_thread = None
         self.work_state = False
+        self.scheduler = Scheduler()
 
-        self.schedule = {
-            #  id: [delay, name]
-            1: [1, 'будильник 1'],
-            2: [1, 'будильник 2'],
-            3: [1, 'будильник 3'],
-        }
-        self.schedule_order = [1, 3, 2]
-        self.cur_task_id = None
-        self.cur_task_name = None
+        self.fill()
 
         # connections block
-        self.begin_button.clicked.connect(self.begin_scheduler)
+        self.begin_button.clicked.connect(self.scheduler_begin)
         self.pause_button.clicked.connect(self.on_pause)
         self.reset_button.clicked.connect(self.on_reset)
+        self.recipe_list_box.currentIndexChanged.connect(self.on_recipe_chenge)
         # connections block
 
-    def get_next_task(self, id):
-        index = self.schedule_order.index(id)
-        if len(self.schedule_order) - 1 == index:
-            return
-        return self.schedule_order[index + 1]
+    def fill(self):
+        for recipe in self.scheduler.all_recipe():
+            self.recipe_list_box.addItem(recipe.name)
+        self.on_recipe_chenge()
 
-    def run_task(self, id):
-        if id not in self.schedule:
-            return
-        delay, name = self.schedule.get(id)
-        next_task_id = self.get_next_task(id)
-        logging.info('run task "{}"'.format(name))
-        self.cur_task_id = id
-        self.cur_task_name = name
+    def run_task(self):
+        if self.scheduler.cur_tomate is None:
+            raise Exception
+        tomate = self.scheduler.cur_tomate
+        next_tomate = self.scheduler.get_next_tomate()
+        logging.info('run task "{}"'.format(tomate.name))
 
-        self.continue_dialog.display_alarm_name(self.cur_task_name)
+        self.continue_dialog.display_alarm_name(tomate.name)
 
-        self.cur_tomate_text.setText(name)
+        self.cur_tomate_text.setText(tomate.name)
         self.next_tomate_text.setText('')
 
-        if next_task_id:
-            ndelay, nname = self.schedule.get(next_task_id)
-            self.next_tomate_text.setText(nname)
+        if next_tomate:
+            self.next_tomate_text.setText(next_tomate.name)
 
-        self.delay_thread = DelayThread(delay)
+        self.delay_thread = DelayThread(tomate.delay)
         self.delay_thread.alarm_timeout.connect(self.on_timeout)
         self.delay_thread.alarm_tic.connect(self.on_tik)
         self.delay_thread.start()
 
     def on_timeout(self):
-        logging.info('run task "{}"'.format(self.cur_task_name))
-        if self.get_next_task(self.cur_task_id):
+        if self.scheduler.get_next_tomate():
             self.continue_dialog.show()
         else:
             self.finish_dialog.show()
@@ -95,23 +108,29 @@ class TimeLauncher(QMainWindow, Ui_MainWindow):
         self.lcd_minute.display(minute_num)
         self.lcd_second.display(second_num)
 
-    def begin_scheduler(self):
+    def on_recipe_chenge(self, *arg):
+        recipe_name = self.recipe_list_box.currentText()
+        self.scheduler.select_recipe(recipe_name)
+        self.scheduler.select_tomate(None)
+        next_tomate = self.scheduler.get_next_tomate()
+        self.next_tomate_text.setText(next_tomate.name)
+
+    def scheduler_begin(self):
         if self.work_state:
             return
         self.work_state = True
-        task_id = self.schedule_order[0]
-        self.run_task(task_id)
+        self.recipe_list_box.setDisabled(True)
+        first_tomate = self.scheduler.get_next_tomate()
+        self.scheduler.select_tomate(first_tomate)
+        self.run_task()
 
     def schedule_continue(self):
         logging.info('main continue')
         self.continue_dialog.hide()
         self.finish_dialog.hide()
-        task_id = self.cur_task_id
-        next_task_id = self.get_next_task(task_id)
-        if next_task_id is None:
-            self.work_state = False
-            return
-        self.run_task(next_task_id)
+        next_tomate = self.scheduler.get_next_tomate()
+        self.scheduler.select_tomate(next_tomate)
+        self.run_task()
 
     def schedule_stop(self):
         logging.info('main stop')
@@ -122,6 +141,8 @@ class TimeLauncher(QMainWindow, Ui_MainWindow):
         self.lcd_minute.display(0)
         self.cur_tomate_text.setText('')
         self.next_tomate_text.setText('')
+        self.recipe_list_box.setDisabled(False)
+        self.on_recipe_chenge()
 
     def on_reset(self):
         self.delay_thread.terminate()
