@@ -6,7 +6,7 @@ import logging
 import warnings
 from ui.interval_view import Ui_MainWindow
 from config import MINUTE, TIC_PER_SECOND
-from notificator import ContinueDialog, FinishDialog
+from widgets import ContinueDialog, FinishDialog, RecipeEditorView, TomateView
 from delay_thread import DelayThread
 from PyQt5.QtWidgets import QApplication, QMainWindow
 from recipe_model import RecipeModel
@@ -52,6 +52,14 @@ class TimeLauncher(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.continue_dialog = ContinueDialog(self)
         self.finish_dialog = FinishDialog(self)
+        self.recipe_editor = RecipeEditorView(self)
+        self.recipe_editor.add_tomate(TomateModel(None, None, 63, 'qwe', None))
+        self.recipe_editor.add_tomate(TomateModel(None, None, 65, 'qwe2', None))
+        self.recipe_editor.add_tomate(TomateModel(None, None, 234, 'qwe3', None))
+        self.recipe_editor.add_tomate(TomateModel(None, None, 4, 'qwe4', None))
+
+        self.recipe_editor.show()
+        # self.tomate_view.show()
 
         self.delay_thread = None
         self.work_state = False
