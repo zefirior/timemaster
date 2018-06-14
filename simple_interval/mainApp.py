@@ -5,7 +5,7 @@ import sys
 import logging
 import warnings
 from ui.interval_view import Ui_MainWindow
-from config import MINUTE, TIC_PER_SECOND
+from config import MINUTE
 from widgets import ContinueDialog, FinishDialog, RecipeEditorView, TomateView
 from delay_thread import DelayThread
 from PyQt5.QtWidgets import QApplication, QMainWindow
@@ -53,13 +53,8 @@ class TimeLauncher(QMainWindow, Ui_MainWindow):
         self.continue_dialog = ContinueDialog(self)
         self.finish_dialog = FinishDialog(self)
         self.recipe_editor = RecipeEditorView(self)
-        self.recipe_editor.add_tomate(TomateModel(None, None, 63, 'qwe', None))
-        self.recipe_editor.add_tomate(TomateModel(None, None, 65, 'qwe2', None))
-        self.recipe_editor.add_tomate(TomateModel(None, None, 234, 'qwe3', None))
-        self.recipe_editor.add_tomate(TomateModel(None, None, 4, 'qwe4', None))
 
-        self.recipe_editor.show()
-        # self.tomate_view.show()
+        self.recipe_editor.hide()
 
         self.delay_thread = None
         self.work_state = False
@@ -72,11 +67,14 @@ class TimeLauncher(QMainWindow, Ui_MainWindow):
         self.pause_button.clicked.connect(self.on_pause)
         self.reset_button.clicked.connect(self.on_reset)
         self.recipe_list_box.currentIndexChanged.connect(self.on_recipe_chenge)
+        self.change_recipe_button.clicked.connect(self.on_edit)
         # connections block
 
     def fill(self):
+        self.recipe_list_box.clear()
         for recipe in self.scheduler.all_recipe():
             self.recipe_list_box.addItem(recipe.name)
+        self.recipe_list_box.setCurrentIndex(0)
         self.on_recipe_chenge()
 
     def run_task(self):
@@ -118,10 +116,19 @@ class TimeLauncher(QMainWindow, Ui_MainWindow):
 
     def on_recipe_chenge(self, *arg):
         recipe_name = self.recipe_list_box.currentText()
+        if recipe_name == '':
+            return
+
+        self.recipe_editor.render_recipe(recipe_name)
+
         self.scheduler.select_recipe(recipe_name)
         self.scheduler.select_tomate(None)
         next_tomate = self.scheduler.get_next_tomate()
         self.next_tomate_text.setText(next_tomate.name)
+
+    def on_edit(self):
+        self.recipe_editor.show()
+        self.setDisabled(True)
 
     def scheduler_begin(self):
         if self.work_state:

@@ -46,3 +46,21 @@ class RecipeModel(BaseModel):
         ).fetchone()
         return cls(id_, name, control_flag)
 
+    def tomates(self):
+        from tomate_model import TomateModel
+        return TomateModel.tomate_by_recipe(self)
+
+    def update(self):
+        self.conn.execute(
+            """
+            update recipe
+            set control_flag = ?,
+                name = ?
+            where id = ?
+            """,
+            [
+                self.control_flag,
+                self.name,
+                self.id_,
+            ]
+        )

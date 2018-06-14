@@ -44,3 +44,20 @@ class TomateModel(BaseModel):
                 in
             data
         ]
+
+    def update(self):
+        self.conn.execute(
+            """
+            update tomate
+            set delay = ?,
+                name = ?,
+                tomate_order = ?
+            where id = ?
+            """,
+            [
+                self.delay,
+                self.name,
+                self.tomate_order,
+                self.id_,
+            ]
+        )
