@@ -1,9 +1,13 @@
+from itertools import count
 from core.base_model import BaseModel
+from tomate_model import TomateModel
 
 
 class RecipeModel(BaseModel):
+    counter = count()
 
     def __init__(self, id_, name, control_flag):
+        self._self_id = next(self.counter)
         self.id_ = id_
         self.name = name
         self.control_flag = control_flag
@@ -47,10 +51,9 @@ class RecipeModel(BaseModel):
         return cls(id_, name, control_flag)
 
     def tomates(self):
-        from tomate_model import TomateModel
         return TomateModel.tomate_by_recipe(self)
 
-    def update(self):
+    def _update(self):
         self.conn.execute(
             """
             update recipe
@@ -64,3 +67,24 @@ class RecipeModel(BaseModel):
                 self.id_,
             ]
         )
+
+    def _insert(self):
+        self.conn.execute(
+            """
+            insert into recipe (
+                control_flag,
+                name
+            ) VALUES (?, ?)
+            """,
+            [
+                self.control_flag,
+                self.name,
+            ]
+        )
+        self.id_ = self.conn.execute('SELECT last_insert_rowid()').fetchone()[0]
+
+    def update(self):
+        if self.id_ is None:
+            self._insert()
+        else:
+            self._update()

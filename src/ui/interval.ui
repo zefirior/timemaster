@@ -214,14 +214,21 @@
         <item>
          <widget class="QPushButton" name="add_recipe_button">
           <property name="text">
-           <string>новый рецепт</string>
+           <string>новый</string>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QPushButton" name="change_recipe_button">
           <property name="text">
-           <string>изменить рецепт</string>
+           <string>изменить</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="button_remove_recipe">
+          <property name="text">
+           <string>удалить</string>
           </property>
          </widget>
         </item>

@@ -1,1 +1,2 @@
-git+ssh://gitlab@gitlab.rc-online.ru/utils/aspirin.git
+PyQt5
+sqlalchemy

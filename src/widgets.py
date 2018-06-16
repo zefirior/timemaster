@@ -1,12 +1,15 @@
 import logging
 from config import MINUTE
+from icon import icons
 from PyQt5.QtWidgets import QWidget
+from PyQt5 import QtGui
 from PyQt5.QtCore import pyqtSignal
 from ui.continue_dialog import Ui_Form as cont_form
 from ui.finish_dialog import Ui_Form as fin_form
 from ui.edit_interval import Ui_Form as editor_form
 from ui.tomate_view import Ui_Form as tomate_form
 from recipe_model import RecipeModel
+from tomate_model import TomateModel
 
 
 class BaseWidget(QWidget):
@@ -102,15 +105,37 @@ class RecipeEditorView(BaseWidget, editor_form):
             self.tomates.append(tomate)
             self.add_tomate(tomate)
 
+    def render_new_recipe(self):
+        self.clear_editor()
+        self.tomates = []
+
+        self.recipe = RecipeModel(None, '', True)
+        self.lineEdit.setText(self.recipe.name)
+        new_tomate = TomateModel(None, self.recipe, 0, '', 1)
+
+        self.tomates.append(new_tomate)
+        self.add_tomate(new_tomate)
+
+    def rerender_recipe(self):
+        self.clear_editor()
+        self.tomates = self.sort_tomates(self.tomates)
+        for tomate in self.tomates:
+            if tomate.drop_flag:
+                continue
+            self.add_tomate(tomate)
+
     @staticmethod
     def sort_tomates(tomates):
         return sorted(tomates, key=lambda t: t.tomate_order)
 
     def find_tomat_by_id(self, tomate_id):
+        if tomate_id is None:
+            return None, None
+
         index = None
         finded_tomate = None
         for i, tomate in enumerate(self.tomates):
-            if tomate.id_ == tomate_id:
+            if tomate._self_id == tomate_id:
                 index = i
                 finded_tomate = tomate
 
@@ -118,11 +143,6 @@ class RecipeEditorView(BaseWidget, editor_form):
             raise Exception('в эдиторе нет томата с id_={}'.format(tomate_id))
 
         return index, finded_tomate
-
-    def rerender_recipe(self):
-        self.clear_editor()
-        for tomate in self.tomates:
-            self.add_tomate(tomate)
 
     def clear_editor(self):
         layout = self.verticalLayout_2
@@ -152,11 +172,38 @@ class RecipeEditorView(BaseWidget, editor_form):
         tomate_view.minute_signal.connect(self.on_minute_change)
         tomate_view.second_signal.connect(self.on_second_change)
         tomate_view.name_signal.connect(self.on_name_change)
+        tomate_view.add_signal.connect(self.new_tomate)
+        tomate_view.remove_signal.connect(self.remove_tomate)
+
+    def new_tomate(self, before_tomate_id):
+        self.tomates = self.sort_tomates(self.tomates)
+
+        b_index, b_tomate = self.find_tomat_by_id(before_tomate_id)
+
+        if b_index is None:
+            index = 0
+            new_order = 1
+        else:
+            index = b_index + 1
+            new_order = b_tomate.tomate_order + 1
+
+        new_tomate = TomateModel(None, self.recipe, 0, '', new_order)
+
+        for i, exist_tomate in enumerate(self.tomates[index:]):
+            exist_tomate.tomate_order = new_order + i + 1
+        self.tomates.insert(index, new_tomate)
+        self.rerender_recipe()
+
+    def remove_tomate(self, tomate_id):
+        index, tomate = self.find_tomat_by_id(tomate_id)
+        tomate.drop_flag = True
+
+        self.rerender_recipe()
 
     def save_recipe(self):
+        self.recipe.update()
         for tomate in self.tomates:
             tomate.update()
-        self.recipe.update()
         self.hide()
         self.main.setDisabled(False)
         self.main.fill()
@@ -186,6 +233,8 @@ class TomateView(QWidget, tomate_form):
     minute_signal = pyqtSignal(int, int)
     second_signal = pyqtSignal(int, int)
     name_signal = pyqtSignal(int, str)
+    add_signal = pyqtSignal(int)
+    remove_signal = pyqtSignal(int)
 
     def __init__(self, app, tomate):
         super().__init__(app)
@@ -195,6 +244,7 @@ class TomateView(QWidget, tomate_form):
 
         self.setupUi(self)
         self.setup_dialog()
+        self.setup_icon()
 
     def setup_dialog(self):
         self.up.clicked.connect(self.on_up)
@@ -202,19 +252,40 @@ class TomateView(QWidget, tomate_form):
         self.spin_minute.valueChanged.connect(self.on_minute_change)
         self.spin_second.valueChanged.connect(self.on_second_change)
         self.tomat_name.textChanged.connect(self.on_name_change)
+        self.add.clicked.connect(self.on_add_tomate)
+        self.remove.clicked.connect(self.on_remove_tomate)
+
+    def setup_icon(self):
+        icon_map = [
+            (icons.up, self.up),
+            (icons.down, self.down),
+            (icons.add, self.add),
+            (icons.remove, self.remove),
+        ]
+
+        for icon_path, widget in icon_map:
+            icon = QtGui.QIcon()
+            icon.addPixmap(QtGui.QPixmap(icon_path), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+            widget.setIcon(icon)
 
     def on_up(self):
-        self.up_signal.emit(self.tomate.id_)
+        self.up_signal.emit(self.tomate._self_id)
 
     def on_down(self):
-        self.down_signal.emit(self.tomate.id_)
+        self.down_signal.emit(self.tomate._self_id)
 
     def on_minute_change(self, minute):
-        self.minute_signal.emit(self.tomate.id_, minute)
+        self.minute_signal.emit(self.tomate._self_id, minute)
 
     def on_second_change(self, second):
-        self.second_signal.emit(self.tomate.id_, second)
+        self.second_signal.emit(self.tomate._self_id, second)
 
     def on_name_change(self, name):
-        self.name_signal.emit(self.tomate.id_, name)
+        self.name_signal.emit(self.tomate._self_id, name)
+
+    def on_add_tomate(self):
+        self.add_signal.emit(self.tomate._self_id)
+
+    def on_remove_tomate(self):
+        self.remove_signal.emit(self.tomate._self_id)
 

@@ -3,47 +3,12 @@
 
 import sys
 import logging
-import warnings
+from PyQt5.QtWidgets import QApplication, QMainWindow
 from ui.interval_view import Ui_MainWindow
 from config import MINUTE
-from widgets import ContinueDialog, FinishDialog, RecipeEditorView, TomateView
+from widgets import ContinueDialog, FinishDialog, RecipeEditorView
 from delay_thread import DelayThread
-from PyQt5.QtWidgets import QApplication, QMainWindow
-from recipe_model import RecipeModel
-from tomate_model import TomateModel
-
-
-class Scheduler:
-    def __init__(self):
-        self.cur_recipe = None
-        self.cur_tomate = None
-
-    @staticmethod
-    def all_recipe():
-        return RecipeModel.recipe_all()
-
-    def select_recipe(self, name):
-        recipe = RecipeModel.recipe_by_name(name)
-        self.cur_recipe = recipe
-        logging.info(self.cur_recipe)
-
-    def select_tomate(self, tomate):
-        self.cur_tomate = tomate
-
-    def get_next_tomate(self):
-        if self.cur_recipe is None:
-            raise Exception
-        if self.cur_tomate is None:
-            cur_tomate_order = 0
-        else:
-            cur_tomate_order = self.cur_tomate.tomate_order
-        tomates = TomateModel.tomate_by_recipe(self.cur_recipe)
-        tomates = [tomate for tomate in tomates if tomate.tomate_order > cur_tomate_order]
-        tomates.sort(key=lambda tomate: tomate.tomate_order)
-        if len(tomates) > 0:
-            return tomates[0]
-        else:
-            return
+from scheduler import Scheduler
 
 
 class TimeLauncher(QMainWindow, Ui_MainWindow):
@@ -62,12 +27,18 @@ class TimeLauncher(QMainWindow, Ui_MainWindow):
 
         self.fill()
 
+        self.pause_word = {
+            False: 'Пауза',
+            True: 'Продолжить',
+        }
+
         # connections block
         self.begin_button.clicked.connect(self.scheduler_begin)
         self.pause_button.clicked.connect(self.on_pause)
         self.reset_button.clicked.connect(self.on_reset)
         self.recipe_list_box.currentIndexChanged.connect(self.on_recipe_chenge)
-        self.change_recipe_button.clicked.connect(self.on_edit)
+        self.change_recipe_button.clicked.connect(self.on_edit_recipe)
+        self.add_recipe_button.clicked.connect(self.on_add_recipe)
         # connections block
 
     def fill(self):
@@ -106,6 +77,7 @@ class TimeLauncher(QMainWindow, Ui_MainWindow):
     def on_pause(self):
         if self.work_state:
             new_state = not self.delay_thread.pause
+            self.pause_button.setText(self.pause_word[new_state])
             self.delay_thread.pause = new_state
 
     def on_tik(self, number):
@@ -126,7 +98,12 @@ class TimeLauncher(QMainWindow, Ui_MainWindow):
         next_tomate = self.scheduler.get_next_tomate()
         self.next_tomate_text.setText(next_tomate.name)
 
-    def on_edit(self):
+    def on_edit_recipe(self):
+        self.recipe_editor.show()
+        self.setDisabled(True)
+
+    def on_add_recipe(self):
+        self.recipe_editor.render_new_recipe()
         self.recipe_editor.show()
         self.setDisabled(True)
 
@@ -157,6 +134,10 @@ class TimeLauncher(QMainWindow, Ui_MainWindow):
         self.cur_tomate_text.setText('')
         self.next_tomate_text.setText('')
         self.recipe_list_box.setDisabled(False)
+
+        pause_state = self.delay_thread.pause
+        self.pause_button.setText(self.pause_word[pause_state])
+
         self.on_recipe_chenge()
 
     def on_reset(self):
