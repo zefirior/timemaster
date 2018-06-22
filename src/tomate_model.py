@@ -42,7 +42,7 @@ class TomateModel(BaseModel):
     @drop_flag.setter
     def drop_flag(self, flag):
         if not isinstance(flag, bool):
-            raise Exception('Невернфй тип флага')
+            raise Exception('Неверный тип флага')
         self._droped_flag = flag
 
     @classmethod

@@ -44,11 +44,15 @@ class RecipeModel(BaseModel):
 
     @classmethod
     def recipe_by_name(cls, name):
-        id_, name, control_flag = cls.conn.execute(
+        if name is None:
+            return
+        res = cls.conn.execute(
             'select id, name, control_flag from recipe where name = ?',
             [name]
         ).fetchone()
-        return cls(id_, name, control_flag)
+        if res is None:
+            return
+        return cls(*res)
 
     def tomates(self):
         return TomateModel.tomate_by_recipe(self)
@@ -83,8 +87,25 @@ class RecipeModel(BaseModel):
         )
         self.id_ = self.conn.execute('SELECT last_insert_rowid()').fetchone()[0]
 
+    def _delete(self):
+        self.conn.execute(
+            """
+            delete from recipe where id = ?
+            """,
+            [
+                self.id_,
+            ]
+        )
+
     def update(self):
         if self.id_ is None:
             self._insert()
         else:
             self._update()
+
+    def delete(self):
+        tomates = TomateModel.tomate_by_recipe(self)
+        for tomate in tomates:
+            tomate.drop_flag = True
+            tomate.update()
+        self._delete()

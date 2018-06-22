@@ -7,11 +7,11 @@
     <x>0</x>
     <y>0</y>
     <width>587</width>
-    <height>301</height>
+    <height>429</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Tomato Cook</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QWidget" name="widget_2" native="true">
@@ -20,7 +20,7 @@
       <x>0</x>
       <y>0</y>
       <width>581</width>
-      <height>281</height>
+      <height>401</height>
      </rect>
     </property>
     <widget class="QLCDNumber" name="lcd_minute">
@@ -28,7 +28,7 @@
       <rect>
        <x>300</x>
        <y>30</y>
-       <width>121</width>
+       <width>111</width>
        <height>61</height>
       </rect>
      </property>
@@ -147,68 +147,22 @@
       <set>Qt::AlignCenter</set>
      </property>
     </widget>
-    <widget class="QLabel" name="label_3">
-     <property name="geometry">
-      <rect>
-       <x>60</x>
-       <y>180</y>
-       <width>131</width>
-       <height>18</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Текущий томат</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_4">
-     <property name="geometry">
-      <rect>
-       <x>60</x>
-       <y>240</y>
-       <width>141</width>
-       <height>18</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Следующий томат</string>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="cur_tomate_text">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <property name="geometry">
-      <rect>
-       <x>240</x>
-       <y>170</y>
-       <width>331</width>
-       <height>32</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="next_tomate_text">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <property name="geometry">
-      <rect>
-       <x>240</x>
-       <y>230</y>
-       <width>331</width>
-       <height>32</height>
-      </rect>
-     </property>
-    </widget>
     <widget class="QWidget" name="widget" native="true">
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>80</y>
+       <y>100</y>
        <width>251</width>
        <height>41</height>
       </rect>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
@@ -248,6 +202,132 @@
      <property name="orientation">
       <enum>Qt::Vertical</enum>
      </property>
+    </widget>
+    <widget class="QScrollArea" name="tomat_list">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>210</y>
+       <width>561</width>
+       <height>181</height>
+      </rect>
+     </property>
+     <property name="widgetResizable">
+      <bool>true</bool>
+     </property>
+     <widget class="QWidget" name="scrollAreaWidgetContents">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>557</width>
+        <height>177</height>
+       </rect>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout">
+         <item>
+          <spacer name="verticalSpacer">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="widget_3" native="true">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>160</y>
+       <width>561</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_5">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_4">
+        <property name="leftMargin">
+         <number>6</number>
+        </property>
+        <property name="rightMargin">
+         <number>6</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="label_3">
+          <property name="text">
+           <string>Томаты</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="Line" name="line_3">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_4">
+          <property name="maximumSize">
+           <size>
+            <width>60</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Минуты</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="Line" name="line_4">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_5">
+          <property name="maximumSize">
+           <size>
+            <width>60</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Cекунды</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
     </widget>
    </widget>
   </widget>

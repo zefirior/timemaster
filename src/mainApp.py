@@ -3,10 +3,11 @@
 
 import sys
 import logging
+from migrate import DataMigrate
 from PyQt5.QtWidgets import QApplication, QMainWindow
-from ui.interval_view import Ui_MainWindow
+from widgets.main_setuper import Ui_MainWindow
 from config import MINUTE
-from widgets import ContinueDialog, FinishDialog, RecipeEditorView
+from widgets import ContinueDialog, FinishDialog, RecipeEditorView, TomateView
 from delay_thread import DelayThread
 from scheduler import Scheduler
 
@@ -39,6 +40,7 @@ class TimeLauncher(QMainWindow, Ui_MainWindow):
         self.recipe_list_box.currentIndexChanged.connect(self.on_recipe_chenge)
         self.change_recipe_button.clicked.connect(self.on_edit_recipe)
         self.add_recipe_button.clicked.connect(self.on_add_recipe)
+        self.button_remove_recipe.clicked.connect(self.on_remove_recipe)
         # connections block
 
     def fill(self):
@@ -52,16 +54,8 @@ class TimeLauncher(QMainWindow, Ui_MainWindow):
         if self.scheduler.cur_tomate is None:
             raise Exception
         tomate = self.scheduler.cur_tomate
-        next_tomate = self.scheduler.get_next_tomate()
-        logging.info('run task "{}"'.format(tomate.name))
 
         self.continue_dialog.display_alarm_name(tomate.name)
-
-        self.cur_tomate_text.setText(tomate.name)
-        self.next_tomate_text.setText('')
-
-        if next_tomate:
-            self.next_tomate_text.setText(next_tomate.name)
 
         self.delay_thread = DelayThread(tomate.delay)
         self.delay_thread.alarm_timeout.connect(self.on_timeout)
@@ -71,8 +65,10 @@ class TimeLauncher(QMainWindow, Ui_MainWindow):
     def on_timeout(self):
         if self.scheduler.get_next_tomate():
             self.continue_dialog.show()
+            self.setDisabled(True)
         else:
             self.finish_dialog.show()
+            self.setDisabled(True)
 
     def on_pause(self):
         if self.work_state:
@@ -87,6 +83,7 @@ class TimeLauncher(QMainWindow, Ui_MainWindow):
         self.lcd_second.display(second_num)
 
     def on_recipe_chenge(self, *arg):
+        self.clear_tomate_list()
         recipe_name = self.recipe_list_box.currentText()
         if recipe_name == '':
             return
@@ -95,10 +92,12 @@ class TimeLauncher(QMainWindow, Ui_MainWindow):
 
         self.scheduler.select_recipe(recipe_name)
         self.scheduler.select_tomate(None)
-        next_tomate = self.scheduler.get_next_tomate()
-        self.next_tomate_text.setText(next_tomate.name)
+        self.render_recipe()
 
     def on_edit_recipe(self):
+        recipe_name = self.recipe_list_box.currentText()
+        if recipe_name == '':
+            return
         self.recipe_editor.show()
         self.setDisabled(True)
 
@@ -106,6 +105,17 @@ class TimeLauncher(QMainWindow, Ui_MainWindow):
         self.recipe_editor.render_new_recipe()
         self.recipe_editor.show()
         self.setDisabled(True)
+
+    def on_remove_recipe(self):
+        recipe = self.scheduler.cur_recipe
+        if recipe is None:
+            return
+        recipe.delete()
+        self.fill()
+
+    def on_reset(self):
+        self.delay_thread.terminate()
+        self.schedule_stop()
 
     def scheduler_begin(self):
         if self.work_state:
@@ -131,8 +141,6 @@ class TimeLauncher(QMainWindow, Ui_MainWindow):
         self.work_state = False
         self.lcd_second.display(0)
         self.lcd_minute.display(0)
-        self.cur_tomate_text.setText('')
-        self.next_tomate_text.setText('')
         self.recipe_list_box.setDisabled(False)
 
         pause_state = self.delay_thread.pause
@@ -140,14 +148,36 @@ class TimeLauncher(QMainWindow, Ui_MainWindow):
 
         self.on_recipe_chenge()
 
-    def on_reset(self):
-        self.delay_thread.terminate()
-        self.schedule_stop()
+    def add_tomate(self, tomate):
+        tomate_view = TomateView(self, tomate)
+
+        position = self.verticalLayout_2.count() - 1
+        self.verticalLayout_2.insertWidget(position, tomate_view)
+
+    def clear_tomate_list(self):
+        layout = self.verticalLayout_2
+        while layout.count() > 1:
+            item = layout.takeAt(0)
+            if not item:
+                continue
+
+            widg = item.widget()
+            if widg:
+                widg.deleteLater()
+
+    def render_recipe(self):
+        self.clear_tomate_list()
+        tomates = self.scheduler.all_tomate()
+        for tomate in tomates:
+            self.add_tomate(tomate)
 
 
 if __name__ == '__main__':
 
-    logging.basicConfig(level=logging.INFO)
+    # logging.basicConfig(level=logging.INFO)
+
+    migrator = DataMigrate()
+    migrator.migrate()
 
     app = QApplication(sys.argv)
 

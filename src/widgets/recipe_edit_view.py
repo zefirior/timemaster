@@ -1,66 +1,26 @@
-import logging
-from config import MINUTE
-from icon import icons
-from PyQt5.QtWidgets import QWidget
-from PyQt5 import QtGui
-from PyQt5.QtCore import pyqtSignal
-from ui.continue_dialog import Ui_Form as cont_form
-from ui.finish_dialog import Ui_Form as fin_form
-from ui.edit_interval import Ui_Form as editor_form
-from ui.tomate_view import Ui_Form as tomate_form
+from core.utils import int_2_time_attr, time_attr_2_int
+from .base_widget import BaseWidget
+from .recipe_edit_setuper import Ui_Form as recipe_edit_setuper
+from .tomate_view import TomateEditView
 from recipe_model import RecipeModel
 from tomate_model import TomateModel
 
 
-class BaseWidget(QWidget):
-    def __init__(self, app):
-        super().__init__()
-        self.app = app
-        self.main = app
-        self.setupUi(self)
-        self.setup_dialog()
-
-    def setup_dialog(self):
-        pass
-
-
-class ContinueDialog(BaseWidget, cont_form):
-
-    def setup_dialog(self):
-        self.continue_button.clicked.connect(self.on_continue)
-        self.cancel_button.clicked.connect(self.on_cancel)
-
-    def display_alarm_name(self, name):
-        self.cur_alarm_name.setText(name)
-
-    def on_continue(self):
-        logging.info('notificator continue')
-        self.main.schedule_continue()
-
-    def on_cancel(self):
-        logging.info('notificator stop')
-        self.main.schedule_stop()
-
-
-class FinishDialog(BaseWidget, fin_form):
-
-    def setup_dialog(self):
-        self.button_ok.clicked.connect(self.on_ok)
-
-    def on_ok(self):
-        logging.info('recipe stop')
-        self.main.schedule_stop()
-
-
-class RecipeEditorView(BaseWidget, editor_form):
+class RecipeEditorView(BaseWidget, recipe_edit_setuper):
     def __init__(self, app):
         super().__init__(app)
+        self.app = app
         self.recipe = None
         self.tomates = []
+        self.tomates_for_remove = []
 
     def setup_dialog(self):
         self.button_save.clicked.connect(self.save_recipe)
-        self.lineEdit.textChanged.connect(self.on_recipe_change)
+        self.recipe_name.textChanged.connect(self.on_recipe_change)
+
+    def closeEvent(self, QCloseEvent):
+        self.app.setDisabled(False)
+        self.hide()
 
     def on_up(self, tomate_id):
         self.tomate_swap(tomate_id, up=True)
@@ -71,18 +31,14 @@ class RecipeEditorView(BaseWidget, editor_form):
     def on_minute_change(self, tomate_id, minute):
         _, tomate = self.find_tomat_by_id(tomate_id)
 
-        cur_delay = tomate.delay
-        second = cur_delay % MINUTE
-
-        tomate.delay = minute * MINUTE + second
+        _, second = int_2_time_attr(tomate.delay)
+        tomate.delay = time_attr_2_int(minute, second)
 
     def on_second_change(self, tomate_id, second):
         _, tomate = self.find_tomat_by_id(tomate_id)
 
-        cur_delay = tomate.delay
-        minute = cur_delay // MINUTE
-
-        tomate.delay = minute * MINUTE + second
+        minute, _ = int_2_time_attr(tomate.delay)
+        tomate.delay = time_attr_2_int(minute, second)
 
     def on_name_change(self, tomate_id, name):
         _, tomate = self.find_tomat_by_id(tomate_id)
@@ -90,14 +46,15 @@ class RecipeEditorView(BaseWidget, editor_form):
 
     def on_recipe_change(self, name):
         self.recipe.name = name
-        self.lineEdit.setText(self.recipe.name)
+        self.recipe_name.setText(self.recipe.name)
 
     def render_recipe(self, recipe_name):
         self.clear_editor()
         self.tomates = []
+        self.tomates_for_remove = []
 
         self.recipe = RecipeModel.recipe_by_name(recipe_name)
-        self.lineEdit.setText(self.recipe.name)
+        self.recipe_name.setText(self.recipe.name)
 
         tomates = self.sort_tomates(self.recipe.tomates())
 
@@ -108,9 +65,10 @@ class RecipeEditorView(BaseWidget, editor_form):
     def render_new_recipe(self):
         self.clear_editor()
         self.tomates = []
+        self.tomates_for_remove = []
 
         self.recipe = RecipeModel(None, '', True)
-        self.lineEdit.setText(self.recipe.name)
+        self.recipe_name.setText(self.recipe.name)
         new_tomate = TomateModel(None, self.recipe, 0, '', 1)
 
         self.tomates.append(new_tomate)
@@ -120,8 +78,6 @@ class RecipeEditorView(BaseWidget, editor_form):
         self.clear_editor()
         self.tomates = self.sort_tomates(self.tomates)
         for tomate in self.tomates:
-            if tomate.drop_flag:
-                continue
             self.add_tomate(tomate)
 
     @staticmethod
@@ -145,6 +101,7 @@ class RecipeEditorView(BaseWidget, editor_form):
         return index, finded_tomate
 
     def clear_editor(self):
+        self.notify.setText('')
         layout = self.verticalLayout_2
         while layout.count() > 1:
             item = layout.takeAt(0)
@@ -156,11 +113,10 @@ class RecipeEditorView(BaseWidget, editor_form):
                 widg.deleteLater()
 
     def add_tomate(self, tomate):
-        tomate_view = TomateView(self, tomate)
+        tomate_view = TomateEditView(self, tomate)
         tomate_view.tomat_name.setText(tomate.name)
 
-        minute = tomate.delay // MINUTE
-        second = tomate.delay - (minute * MINUTE)
+        minute, second = int_2_time_attr(tomate.delay)
 
         tomate_view.spin_minute.setValue(minute)
         tomate_view.spin_second.setValue(second)
@@ -195,18 +151,54 @@ class RecipeEditorView(BaseWidget, editor_form):
         self.rerender_recipe()
 
     def remove_tomate(self, tomate_id):
+        if len(self.tomates) <= 1:
+            self.notify.setText('Нельзя удалять последний томат')
+            return
+
         index, tomate = self.find_tomat_by_id(tomate_id)
         tomate.drop_flag = True
+        self.tomates_for_remove.append(tomate)
+        self.tomates.remove(tomate)
 
         self.rerender_recipe()
 
     def save_recipe(self):
+        check_msg = self.check_before_save()
+        if check_msg:
+            self.notify.setText(check_msg)
+            return
+
         self.recipe.update()
         for tomate in self.tomates:
+            tomate.update()
+        for tomate in self.tomates_for_remove:
             tomate.update()
         self.hide()
         self.main.setDisabled(False)
         self.main.fill()
+
+    def check_before_save(self):
+        if self.recipe.name == '':
+            return "Название рецепта не может быть пустым"
+
+        recipe_from_db = RecipeModel.recipe_by_name(self.recipe.name)
+        if (
+            recipe_from_db is not None and
+            recipe_from_db.name == self.recipe.name and
+            self.recipe.id_ is not None and
+            self.recipe.id_ != recipe_from_db.id_
+        ):
+            return "Такой рецепт уже есть"
+
+        if len(self.tomates) == 0:
+            return "Нужен хоть один томат"
+
+        for tomate in self.tomates:
+            # names = set()
+            if tomate.name == '':
+                return "Томат без названия"
+            # if tomate.name in names:
+            #     return ""
 
     def tomate_swap(self, tomate_id, up):
         shift = -1 if up else 1
@@ -226,66 +218,4 @@ class RecipeEditorView(BaseWidget, editor_form):
         self.tomates = self.sort_tomates(self.tomates)
         self.rerender_recipe()
 
-
-class TomateView(QWidget, tomate_form):
-    up_signal = pyqtSignal(int)
-    down_signal = pyqtSignal(int)
-    minute_signal = pyqtSignal(int, int)
-    second_signal = pyqtSignal(int, int)
-    name_signal = pyqtSignal(int, str)
-    add_signal = pyqtSignal(int)
-    remove_signal = pyqtSignal(int)
-
-    def __init__(self, app, tomate):
-        super().__init__(app)
-        self.app = app
-        self.main = app
-        self.tomate = tomate
-
-        self.setupUi(self)
-        self.setup_dialog()
-        self.setup_icon()
-
-    def setup_dialog(self):
-        self.up.clicked.connect(self.on_up)
-        self.down.clicked.connect(self.on_down)
-        self.spin_minute.valueChanged.connect(self.on_minute_change)
-        self.spin_second.valueChanged.connect(self.on_second_change)
-        self.tomat_name.textChanged.connect(self.on_name_change)
-        self.add.clicked.connect(self.on_add_tomate)
-        self.remove.clicked.connect(self.on_remove_tomate)
-
-    def setup_icon(self):
-        icon_map = [
-            (icons.up, self.up),
-            (icons.down, self.down),
-            (icons.add, self.add),
-            (icons.remove, self.remove),
-        ]
-
-        for icon_path, widget in icon_map:
-            icon = QtGui.QIcon()
-            icon.addPixmap(QtGui.QPixmap(icon_path), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-            widget.setIcon(icon)
-
-    def on_up(self):
-        self.up_signal.emit(self.tomate._self_id)
-
-    def on_down(self):
-        self.down_signal.emit(self.tomate._self_id)
-
-    def on_minute_change(self, minute):
-        self.minute_signal.emit(self.tomate._self_id, minute)
-
-    def on_second_change(self, second):
-        self.second_signal.emit(self.tomate._self_id, second)
-
-    def on_name_change(self, name):
-        self.name_signal.emit(self.tomate._self_id, name)
-
-    def on_add_tomate(self):
-        self.add_signal.emit(self.tomate._self_id)
-
-    def on_remove_tomate(self):
-        self.remove_signal.emit(self.tomate._self_id)
 

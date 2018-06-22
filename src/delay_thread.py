@@ -24,7 +24,6 @@ class DelayThread(QThread):
 
     def run(self):
         time_iter = self.delay_generator(self.delay)
-        next(time_iter)
         while True:
             logging.info(self.tic)
 

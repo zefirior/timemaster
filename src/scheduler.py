@@ -14,6 +14,13 @@ class Scheduler:
     def all_recipe():
         return RecipeModel.recipe_all()
 
+    def all_tomate(self):
+        if self.cur_recipe is None:
+            return
+        tomates = TomateModel.tomate_by_recipe(self.cur_recipe)
+        tomates.sort(key=lambda tomate: tomate.tomate_order)
+        return tomates
+
     def select_recipe(self, name):
         recipe = RecipeModel.recipe_by_name(name)
         self.cur_recipe = recipe
