@@ -4,7 +4,7 @@ from config import BASE_DIR
 
 class ContentPath:
     def __init__(self):
-        self.content_dir = os.path.join(BASE_DIR, '..', 'content')
+        self.content_dir = os.path.join(BASE_DIR, 'content')
         self._icon_path = {
             'up':     ["icon-up.png"],
             'down':   ["icon-down.png"],
