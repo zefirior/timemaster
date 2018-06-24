@@ -64,10 +64,10 @@ class TimeLauncher(QMainWindow, Ui_MainWindow):
 
     def on_timeout(self):
         if self.scheduler.get_next_tomate():
-            self.continue_dialog.show()
+            self.continue_dialog.widg_show()
             self.setDisabled(True)
         else:
-            self.finish_dialog.show()
+            self.finish_dialog.widg_show()
             self.setDisabled(True)
 
     def on_pause(self):
@@ -128,16 +128,16 @@ class TimeLauncher(QMainWindow, Ui_MainWindow):
 
     def schedule_continue(self):
         logging.info('main continue')
-        self.continue_dialog.hide()
-        self.finish_dialog.hide()
+        self.continue_dialog.widg_hide()
+        self.finish_dialog.widg_hide()
         next_tomate = self.scheduler.get_next_tomate()
         self.scheduler.select_tomate(next_tomate)
         self.run_task()
 
     def schedule_stop(self):
         logging.info('main stop')
-        self.continue_dialog.hide()
-        self.finish_dialog.hide()
+        self.continue_dialog.widg_hide()
+        self.finish_dialog.widg_hide()
         self.work_state = False
         self.lcd_second.display(0)
         self.lcd_minute.display(0)

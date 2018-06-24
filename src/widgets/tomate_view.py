@@ -1,4 +1,4 @@
-from icon import icons
+from content_path import cont_path
 from PyQt5.QtWidgets import QWidget
 from PyQt5 import QtGui
 from PyQt5.QtCore import pyqtSignal
@@ -37,10 +37,10 @@ class TomateEditView(QWidget, tomate_edit_setuper):
 
     def setup_icon(self):
         icon_map = [
-            (icons.up, self.up),
-            (icons.down, self.down),
-            (icons.add, self.add),
-            (icons.remove, self.remove),
+            (cont_path.up, self.up),
+            (cont_path.down, self.down),
+            (cont_path.add, self.add),
+            (cont_path.remove, self.remove),
         ]
 
         for icon_path, widget in icon_map:
